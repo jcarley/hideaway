@@ -7,11 +7,22 @@ import encryptor from '../../app/lib/encrypt';
 
 require('../sinon-setup.js');
 
-describe('lib', () => {
+describe('lib', function() {
 
-  describe('encrypt', () => {
+  describe('encrypt', function() {
 
-    it('should encrypt a file', (done) => {
+    it('generates a salt', function() {
+      let options = {}
+      return encryptor.encrypt(options, function(err, result) {
+        expect(err).to.be.null;
+        expect(result.salt).to.not.be.null;
+      });
+    });
+  });
+
+  describe('encryptStream', () => {
+
+    it('encrypts a file', (done) => {
 
       let fileToEncryptPath = path.join(process.cwd(), "test", "fixtures", "file.txt");
 
@@ -32,6 +43,49 @@ describe('lib', () => {
       });
     });
 
+    it('fails when no options supplied', (done) => {
+      encryptor.encryptStream(null, (err, result) => {
+        expect(err).to.be.an('error');
+        expect(err.message).to.be.eql("options is required");
+        done();
+      });
+    });
+
+    it('requires a reader', (done) => {
+      let options = {
+        reader: null
+      };
+      encryptor.encryptStream(options, (err, result) => {
+        expect(err).to.be.an('error');
+        expect(err.message).to.be.eql("reader is required");
+        done();
+      });
+    });
+
+    it('requires a writer', (done) => {
+      let options = {
+        reader: new streams.ReadableStream('Hello World\n'),
+        writer: null
+      };
+      encryptor.encryptStream(options, (err, result) => {
+        expect(err).to.be.an('error');
+        expect(err.message).to.be.eql("writer is required");
+        done();
+      });
+    });
+
+    it('requires a password', (done) => {
+      let options = {
+        password: null,
+        reader: new streams.ReadableStream('Hello World\n'),
+        writer: new streams.WritableStream()
+      };
+      encryptor.encryptStream(options, (err, result) => {
+        expect(err).to.be.an('error');
+        expect(err.message).to.be.eql("password is required");
+        done();
+      });
+    });
   });
 });
 

@@ -4,50 +4,31 @@ import zlib from 'zlib';
 
 export default {
 
+  // options.fileName
   // options.password
-  // options.key
-  // options.filePath
   // options.reader
   // options.writer
-  encrypt: (options, callback) => {
-
-    let algorithm = 'aes-256-ctr';
-
-    // input file
-    var r = fs.createReadStream(options.filePath);
-    // zip content
-    var zip = zlib.createGzip();
-    // encrypt content
-    var encrypt = crypto.createCipher(algorithm, options.password);
-
-    // write file
-    var w = fs.createWriteStream('file.out.txt');
-
-    // start pipe
-    r.pipe(zip).pipe(encrypt).pipe(w);
-
-    callback();
-  },
-
-  // (err, result)
   encryptStream: (options, callback) => {
 
-    if (typeof options === "undefined" && options === null) {
+    if (options === null) {
       callback(new Error("options is required"), null);
+      return;
     }
 
-    // if(options.reader == null) {
-      // let err = new Error("");
-      // callback(someerror, null);
-    // }
+    if(options.reader === null) {
+      callback(new Error("reader is required"), null);
+      return;
+    }
 
-    // if(options.writer === null) {
-      // callback(someerror, null);
-    // }
+    if(options.writer === null) {
+      callback(new Error("writer is required"), null);
+      return;
+    }
 
-    // if(options.password === null || options.password === "") {
-      // callback(someerror, null);
-    // }
+    if(typeof options.password === "undefined" || options.password === null || options.password === "") {
+      callback(new Error("password is required"), null);
+      return;
+    }
 
     let algorithm = 'aes-256-ctr';
 
@@ -56,7 +37,17 @@ export default {
     // zip content
     var zip = zlib.createGzip();
     // encrypt content
-    var encrypt = crypto.createCipher(algorithm, options.password);
+
+    crypto.randomBytes(256, (err, buf) => {
+      if (err) throw err;
+    });
+
+    crypto.pbkdf2(options.password, 'salt', 100000, 512, 'sha512', (err, key) => {
+      if (err) throw err;
+      console.log(key.toString('hex'));  // '3745e48...aa39b34'
+    });
+
+    var encrypt = crypto.createCipheriv(algorithm, key, iv);
 
     // write file
     var w = options.writer;
@@ -77,5 +68,39 @@ export default {
 
     // start pipe
     r.pipe(zip).pipe(encrypt).pipe(w);
+  },
+
+  encrypt(options, callback) {
+    return this.generateSalt(options)
+      .then((o) => {
+        callback(null, o)
+      })
+  },
+
+  computeKey(password, cb) {
+  },
+
+  generateSalt(options) {
+    return new Promise((resolve, reject) => {
+      crypto.randomBytes(256, (err, buf) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        options.salt = buf;
+        resolve(options);
+      });
+    });
+  },
+
+  generateIV(options) {
+    return new Promise((resolve, reject) => {
+      crypto.randomBytes(256, (err, buf) => {
+        if (err) reject(err);
+        options.iv = buf;
+        resolve(options);
+      });
+    });
   }
+
 }
