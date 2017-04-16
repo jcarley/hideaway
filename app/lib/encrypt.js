@@ -47,7 +47,7 @@ export default {
       console.log(key.toString('hex'));  // '3745e48...aa39b34'
     });
 
-    var encrypt = crypto.createCipheriv(algorithm, key, iv);
+    var encrypt = crypto.createCipheriv(algorithm, options.password, iv);
 
     // write file
     var w = options.writer;
