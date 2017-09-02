@@ -35,11 +35,15 @@ describe('lib', function() {
         reader: reader,
         writer: writer
       };
-      encryptor.encryptStream(options, (err, result) => {
-        expect(err).to.be.null;
-        expect(writer.toString()).to.not.be.eql("");
-        // expect(result.ID).to.be.eql("");
-        done();
+
+      encryptor.generateIV(options).then((options) => {
+        encryptor.encryptStream(options, (err, result) => {
+          console.log("FUCK");
+          expect(err).to.be.null;
+          expect(writer.toString()).to.not.be.eql("");
+          // expect(result.ID).to.be.eql("");
+          done();
+        });
       });
     });
 

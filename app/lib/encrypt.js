@@ -35,7 +35,7 @@ export default {
     // input file
     var r = options.reader;
     // zip content
-    var zip = zlib.createGzip();
+    // var zip = zlib.createGzip();
     // encrypt content
 
     crypto.randomBytes(256, (err, buf) => {
@@ -53,21 +53,31 @@ export default {
     var w = options.writer;
 
     r.on('error', (err) => {
-      callback(err, null);
-      return;
-    });
-
-    w.on('error', (err) => {
+      console.log("READER error");
       callback(err, null);
       return;
     });
 
     r.on('readable', function() {
+      console.log("READER readable");
       callback(null, {});
+      return;
+    });
+
+    w.on('error', (err) => {
+      console.log("WRITER error");
+      callback(err, null);
+      return;
+    });
+
+    w.on('close', () => {
+      console.log("WRITER close");
+      callback(err, null);
+      return;
     });
 
     // start pipe
-    r.pipe(zip).pipe(encrypt).pipe(w);
+    r.pipe(encrypt).pipe(w);
   },
 
   encrypt(options, callback) {
@@ -96,7 +106,10 @@ export default {
   generateIV(options) {
     return new Promise((resolve, reject) => {
       crypto.randomBytes(256, (err, buf) => {
-        if (err) reject(err);
+        if (err) {
+          reject(err);
+          return;
+        }
         options.iv = buf;
         resolve(options);
       });
