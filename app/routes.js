@@ -2,8 +2,8 @@ import React from 'react';
 import { Route, IndexRoute } from 'react-router';
 
 import App from './containers/App';
-import LoginPage from './containers/LoginPage';
-import LoggedInPage from './containers/LoggedInPage';
+import LoginPage from './components/login/LoginPage';
+import LoggedInPage from './components/loggedin/LoggedInPage';
 
 export default (
   <Route path="/" component={App}>

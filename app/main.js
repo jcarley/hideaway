@@ -24,8 +24,8 @@ const installExtensions = async () => {
 };
 
 crashReporter.start({
-  productName: 'YourName',
-  companyName: 'YourCompany',
+  productName: 'Hideaway',
+  companyName: 'Finish First Software',
   submitURL: 'https://your-domain.com/url-to-submit',
   uploadToServer: false
 });
